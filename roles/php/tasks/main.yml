@@ -1,0 +1,40 @@
+- name: install remi epel
+  yum: name={{ item }} state=present
+  loop:
+    - "{{ PHP_VERSION_REMI }}"
+    - "{{ PHP_VERSION_EPEL }}"
+
+- name: install php74
+  yum: name={{ item }} state=present enablerepo=epel,remi,remi-php74
+  loop:
+    - php
+    - php-mbstring
+    - php-pdo
+    - php-mysqlnd
+    - php-fpm
+
+- name: start php-fpm
+  systemd: name=php-fpm state=started enabled=yes
+
+- name: copy php.ini
+  copy:
+    src: "{{ item.src }}"
+    dest: "/etc/{{ item.dest }}"
+    backup: no
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - { src: "roles/php/files/php.ini", dest: . }
+
+- name: copy www.conf
+  copy:
+    src: "{{ item.src }}"
+    dest: "/etc/php-fpm.d/{{ item.dest }}"
+    backup: no
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - { src: "roles/php/files/www.conf", dest: . }
+  notify: restart php-fpm

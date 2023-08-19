@@ -1,0 +1,9 @@
+- name: yum update
+  yum: name=* state=latest
+
+- name: yum install packages
+  yum: name={{ item }} state=present
+  loop:
+    - vim
+    - wget
+    - yum-utils

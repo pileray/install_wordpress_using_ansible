@@ -1,0 +1,27 @@
+- name: remove mariadb
+  yum: name=mariadb-libs state=removed
+
+- name: install rpm
+  yum: name={{ item }} state=present
+  loop:
+    - "{{ MYSQL_VERSION }}"
+
+- name: install mysqld
+  yum: name={{ item }} state=installed 
+  loop:
+    - mysql-community-server
+
+- name: start mysqld
+  systemd: name=mysqld state=started enabled=yes
+
+- name: copy mysqld config
+  copy:
+    src: "{{ item.src }}"
+    dest: "/etc/{{ item.dest }}"
+    owner: root
+    group: root
+    backup: no
+    mode: 644
+  loop:
+    - { src: roles/mysql/files/my.cnf, dest: . }
+  notify: restart mysqld

@@ -1,0 +1,28 @@
+- name: copy nginx.repo
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    backup: no
+  loop:
+    - { src: roles/nginx/files/nginx.repo, dest: /etc/yum.repos.d/ }
+
+- name: install nginx
+  yum: name={{ item }} state=latest
+  loop:
+    - nginx
+
+- name: start nginx
+  systemd: name=nginx enabled=yes state=started
+
+- name: copy nginx conf
+  copy:
+    src: "{{ item.src }}"
+    dest: "/etc/nginx/{{ item.dest }}"
+    backup: no
+    owner: root
+    group: root
+  loop:
+    - { src: roles/nginx/files/conf.d, dest: . }
+  notify: restart nginx

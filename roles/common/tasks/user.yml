@@ -1,0 +1,25 @@
+- name: create user
+  user:
+    name: "{{ item.name }}"
+    createhome: yes
+    password: "{{ item.password | password_hash('sha512') }}"
+    shell: "{{ item.shell }}"
+    groups: "{{ item.groups }}"
+    state: "{{ item.state }}"
+  loop:
+    - { shell: '/bin/bash', groups: 'wheel', state: 'present', name: 'menta', password: 'xxxxxx' }
+
+- name: add sudoers
+  lineinfile: 
+    path: /etc/sudoers
+    state: present
+    regexp: "{{ item.match }}"
+    line: "{{ item.line }}"
+  loop:
+  - { match: 'menta', line: 'menta ALL=(ALL) NOPASSWD: ALL' }
+
+- name: authorized_key for user menta
+  ignore_errors: true
+  authorized_key:
+    user: menta
+    key: "authorized_keys"

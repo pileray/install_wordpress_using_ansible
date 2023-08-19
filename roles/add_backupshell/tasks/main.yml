@@ -1,0 +1,10 @@
+- name: copy mysqlbackup shellscript
+  copy:
+    src: "{{ item.src }}"
+    dest: "/root/{{ item.dest }}"
+    backup: no
+    owner: root
+    group: root
+    mode: 0700
+  loop:
+    - { src: "roles/add_backupshell/files/mysqlbackup.sh", dest: . }
